@@ -19,11 +19,15 @@ jobs:
           
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt -t .
+          # Create a clean requirements file if it doesn't exist
+          test -f requirements.txt || echo "urllib3" > requirements.txt
+          # Install to the current directory so they get zipped
+          pip install --upgrade urllib3 -t .
 
       - name: Create Deployment Package
         run: |
-          zip -r deploy.zip . -x ".git*" ".github*" "venv/*" "tests/*" ".gitignore"
+          # Zip everything except unnecessary dev files
+          zip -r deploy.zip . -x ".git*" ".github*" "venv/*" "tests/*" ".gitignore" "*.zip"
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
@@ -37,8 +41,9 @@ jobs:
       - name: Notify Telegram on Success
         if: success()
         env:
+          # Double check these match your AWS environment variables
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           curl -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
-          -d "chat_id=${TELEGRAM_CHAT_ID}&text=🚀 *Deployment Finished!*%0A%0AProject: *DeployKIT*%0AStatus: Success ✅&parse_mode=Markdown"
+          -d "chat_id=${TELEGRAM_CHAT_ID}&text=🚀 *Deployment Finished!*%0A%0AProject: *OpsBeacon*%0AStatus: Success ✅&parse_mode=Markdown"

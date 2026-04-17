@@ -34,7 +34,3 @@ jobs:
           aws_region: eu-north-1  
           function_name: OpsBeacon
           zip_file: deploy.zip
-          envs: |
-            TOKEN=${{ secrets.TELEGRAM_TOKEN }}
-            CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-       

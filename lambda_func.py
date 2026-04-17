@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-load_dotenv()
-
 TOKEN = os.getenv('TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 

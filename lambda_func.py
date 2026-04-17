@@ -20,11 +20,20 @@ def lambda_handler(event, context):
         return {"statusCode": 500, "body": "Configuration Error"}
     
     try:
-        sns_data = event['Records'][0]['Sns']
-        subject = sns_data.get("Subject", "OpsBeacon Alert")
-        message = sns_data.get('Message', 'No message content')
-
-        formatted_text = f"🚨 *{subject}*\n\n{message}"
+        if 'Records' in event and 'Sns' in event['Records'][0]:
+            sns_data = event['Records'][0]['Sns']
+            subject = sns_data.get("Subject", "OpsBeacon Alert")
+            message = sns_data.get('Message', 'No message content')
+            formatted_text = f"🚨 *{subject}*\n\n{message}"
+        
+        elif 'body' in event:
+            body = json.loads(event['body'])
+            user_text = body.get('message', {}).get('text', 'No text')
+            formatted_text = f"✅ *OpsBeacon Online*\n\nЯ получил твое сообщение: {user_text}"
+        
+        else:
+            logger.info("Unknown event format")
+            return {"statusCode": 200, "body": "Unknown Event"}
 
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         payload = {
@@ -35,19 +44,12 @@ def lambda_handler(event, context):
 
         encoded_data = json.dumps(payload).encode('utf-8')
         response = http.request(
-            'POST',
-            url,
-            body=encoded_data,
+            'POST', url, body=encoded_data,
             headers={'Content-Type': 'application/json'}
         )
 
-        if response.status != 200:
-            logger.error(f"Telegram API error: {response.data.decode('utf-8')}")
-            return {"statusCode": response.status, "body": "API Error"}
-        
-        logger.info("Alert sent successfully")
-        return {"statusCode": 200, "body": "Alert Sent"}
+        return {"statusCode": 200, "body": "OK"}
         
     except Exception as e:
         logger.error(f"Process Error: {str(e)}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, "body": "Error"}

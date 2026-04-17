@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 TOKEN = os.environ.get('TOKEN')
 CHAT_ID = os.environ.get('CHAT_ID')
 # Replace with the public endpoint of your DeployKIT project
-DEPLOYKIT_URL = "http://YOUR_EC2_IP_HERE" 
+DEPLOYKIT_URL = "http://13.48.224.107:8000/"
 
 # Use PoolManager for persistent connections and define request timeouts
 http = urllib3.PoolManager(timeout=5.0)

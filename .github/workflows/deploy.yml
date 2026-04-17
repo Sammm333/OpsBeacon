@@ -1,0 +1,40 @@
+name: Deploy OpsBeacon Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt -t .
+
+
+      - name: Create Deployment Package
+        run: |
+          zip -r deploy.zip . -x ".git*" ".github*" "venv/*" "tests/*" ".gitignore"
+
+      - name: Deploy to AWS Lambda
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: eu-north-1  
+          function_name: OpsBeacon
+          zip_file: deploy.zip
+          envs: |
+            TOKEN=${{ secrets.TELEGRAM_TOKEN }}
+            CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+       

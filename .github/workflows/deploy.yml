@@ -33,3 +33,12 @@ jobs:
           aws_region: eu-north-1  
           function_name: OpsBeacon-Notifier
           zip_file: deploy.zip
+      
+      - name: Notify Telegram on Success
+        if: success()
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+          -d "chat_id=${TELEGRAM_CHAT_ID}&text=🚀 *Deployment Finished!*%0A%0AProject: *DeployKIT*%0AStatus: Success ✅&parse_mode=Markdown"

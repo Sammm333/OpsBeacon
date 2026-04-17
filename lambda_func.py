@@ -12,11 +12,11 @@ CHAT_ID = os.environ.get('CHAT_ID')
 http = urllib3.PoolManager()
 
 def lambda_handler(event, context):
-    logger.info(f"Full event received: {json.dumps(event)}")
+    logger.info(f"Event: {json.dumps(event)}")
     
     if not TOKEN or not CHAT_ID:
-        logger.error("Security Alert: Telegram Credentials Missing in Environment Variables")
-        return {"statusCode": 500, "body": "Configuration Error"}
+        logger.error("Missing TOKEN or CHAT_ID")
+        return {"statusCode": 500, "body": "Config Error"}
     
     try:
         if 'Records' in event and 'Sns' in event['Records'][0]:
@@ -28,13 +28,11 @@ def lambda_handler(event, context):
         elif 'body' in event:
             raw_body = event['body']
             body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
-            
-            user_text = body.get('message', {}).get('text', 'No text found')
-            text_to_send = f"✅ *OpsBeacon Online*\n\nЯ получил твое сообщение: {user_text}"
+            user_text = body.get('message', {}).get('text', 'No text')
+            text_to_send = f"✅ *OpsBeacon Online*\n\nReceived: {user_text}"
         
         else:
-            logger.warning("Event format not recognized")
-            return {"statusCode": 200, "body": "Unknown format"}
+            return {"statusCode": 200, "body": "Unknown Event Format"}
 
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         payload = {
@@ -44,15 +42,16 @@ def lambda_handler(event, context):
         }
 
         encoded_data = json.dumps(payload).encode('utf-8')
-        res = http.request(
-            'POST', url, 
+        response = http.request(
+            'POST', 
+            url, 
             body=encoded_data, 
             headers={'Content-Type': 'application/json'}
         )
 
-        logger.info(f"Telegram response: {res.data.decode('utf-8')}")
-        return {"statusCode": 200, "body": "Success"}
+        logger.info(f"Telegram response: {response.data.decode('utf-8')}")
+        return {"statusCode": 200, "body": "OK"}
 
     except Exception as e:
-        logger.error(f"Critical Error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         return {"statusCode": 500, "body": str(e)}

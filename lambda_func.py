@@ -58,6 +58,9 @@ def lambda_handler(event, context):
                 text_to_send = check_deploykit_status()
             elif user_text == "/start":
                 text_to_send = "OpsBeacon active. Use /status to monitor DeployKIT."
+            elif user_text == "/resource":
+                text_to_send = "📂 *Project Resources*\n\nView the source code, documentation, and architecture on GitHub:\nhttps://github.com/Sammm333/OpsBeacon.git"
+        
             else:
                 text_to_send = f"✅ Received: {user_text}\nType /status to check health."
 

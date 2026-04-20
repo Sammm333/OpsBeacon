@@ -9,7 +9,6 @@ logger.setLevel(logging.INFO)
 
 TOKEN = os.environ.get('TOKEN')
 CHAT_ID = os.environ.get('CHAT_ID')
-# This should be your ELASTIC IP (e.g., http://13.51.xx.xx)
 DEPLOYKIT_URL = os.environ.get('DEPLOYKIT_URL')
 
 http = urllib3.PoolManager()
